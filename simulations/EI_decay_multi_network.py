@@ -207,7 +207,7 @@ def run_simulation_with_fc(condition_name,
     f = f[band]
     Pxx = Pxx[band]
     
-#    Pxx_rel = Pxx / np.sum(Pxx)
+    Pxx_rel = Pxx   / np.sum(Pxx)
     
     return {
         'condition': condition_name,
@@ -259,7 +259,8 @@ def stitch_spectra(results_by_condition, band_ranges):
             mask = (f >= low) & (f < high)
             
             all_f.append(f[mask])
-            all_Pxx.append(Pxx[mask])
+            #band_energy = np.trapz(Pxx[mask], f[mask])
+            all_Pxx.append(Pxx[mask] ) #* band_energy)
         
         # Concatenate all segments
         if all_f:
