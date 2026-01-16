@@ -150,7 +150,19 @@ def run_simulation_with_fc(condition_name,
     # Recording
     mE = nest.Create("multimeter")
     mE.set(record_from=["V_m"], interval=1.0)
-    nest.Connect(mE, E_populations[0][:20])
+   
+    targets = None
+    for s in range(N_subnets):
+        n = min(5, len(E_populations[s]))   # up to 5 E neurons per subnetwork
+        if n == 0:
+            continue
+        if targets is None:
+            targets = E_populations[s][:n]
+        else:
+            targets += E_populations[s][:n]   # NodeCollection-safe concatenation
+
+    nest.Connect(mE, targets)
+
     
     spike_recorders = []
     for subnet_idx in range(N_subnets):
@@ -195,7 +207,7 @@ def run_simulation_with_fc(condition_name,
     f = f[band]
     Pxx = Pxx[band]
     
-    Pxx_rel = Pxx / np.sum(Pxx)
+#    Pxx_rel = Pxx / np.sum(Pxx)
     
     return {
         'condition': condition_name,
@@ -233,7 +245,7 @@ def stitch_spectra(results_by_condition, band_ranges):
         all_Pxx = []
         
         # Process each band in order
-        for band_name in ['theta', 'alpha', 'beta', 'gamma']:
+        for band_name in ['delta','theta', 'alpha', 'beta', 'gamma']:
             if band_name not in band_results:
                 print(f"    Warning: Missing {band_name} for {condition}")
                 continue
@@ -271,6 +283,7 @@ def stitch_spectra(results_by_condition, band_ranges):
 
 DATA_ROOT = "./"
 BAND_RANGES = {
+    'delta': (1, 4), 
     'theta': (4, 8),
     'alpha': (8, 13),
     'beta': (13, 30),
@@ -288,11 +301,7 @@ print("="*70)
 print("MULTI-SUBNETWORK SIMULATION - STITCHED SPECTRA")
 print("="*70)
 print(f"Running 4 separate simulations per condition (one per band)")
-print(f"Then stitching frequency ranges:")
-print(f"  Theta FC → 4-8 Hz")
-print(f"  Alpha FC → 8-13 Hz")
-print(f"  Beta FC → 13-30 Hz")
-print(f"  Gamma FC → 30-45 Hz")
+print(f"Then stitching frequency ranges")
 print("="*70)
 
 # Store results: {condition: {band: result}}
@@ -369,7 +378,7 @@ if len(stitched_results) >= 2:
     for condition, data in stitched_results.items():
         g_ratio = CONDITIONS[condition]
         ax.plot(data['f'], data['Pxx'], 
-               label=f"{condition} (g_ratio={g_ratio:.1f})",
+               label=f"{condition}",
                linewidth=2.5, 
                color=colors[condition], 
                alpha=0.85)
@@ -377,31 +386,31 @@ if len(stitched_results) >= 2:
     # Add vertical lines at band boundaries
     band_boundaries = [4, 8, 13, 30]
     for boundary in band_boundaries:
-        ax.axvline(x=boundary, color='red', linestyle='--', linewidth=2, alpha=0.8)
+        ax.axvline(x=boundary, color='gray', linestyle='--', linewidth=2, alpha=0.8)
     
     # Add band labels
-    y_max = ax.get_ylim()[1]
-    band_centers = [(4+8)/2, (8+13)/2, (13+30)/2, (30+45)/2]
-    band_names = ['Theta\n(Theta FC)', 'Alpha\n(Alpha FC)', 'Beta\n(Beta FC)', 'Gamma\n(Gamma FC)']
+        y_max = ax.get_ylim()[1]
+        band_centers = [(1+4)/2, (4+8)/2, (8+13)/2, (13+30)/2, (30+40)/2]
+        band_names = ['Delta', 'Theta', 'Alpha', 'Beta', 'Gamma']
     
     for center, name in zip(band_centers, band_names):
         ax.text(center, y_max * 0.92, name, 
                horizontalalignment='center', 
                fontsize=9, 
                style='italic',
-               color='red',
+               #color='red',
                alpha=0.8,
-               bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.7, edgecolor='red'))
+               #bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.7, edgecolor='red')
+               )
     
     ax.set_xlabel("Frequency (Hz)", fontsize=14, fontweight='bold')
     ax.set_ylabel("Relative power", fontsize=14, fontweight='bold')
-    ax.set_xlim([4, 45])
-    ax.set_title("Stitched Power Spectrum\n(Each band uses its corresponding FC matrix)", 
-                fontsize=13, fontweight='bold')
-    ax.grid(alpha=0.2)
-    ax.legend(fontsize=12)
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
+    ax.set_xlim([1, 40])
+#    ax.set_title("Stitched Power Spectrum\n(Each band uses its corresponding FC matrix)",                fontsize=13, fontweight='bold')
+    ax.grid(alpha=0.3)
+    ax.legend(fontsize=11,loc='upper right')
+    #ax.spines['top'].set_visible(False)
+    #ax.spines['right'].set_visible(False)
     
     plt.tight_layout()
     plt.savefig("stitched_spectrum.png", dpi=300, bbox_inches='tight')

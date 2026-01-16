@@ -240,7 +240,7 @@ def run_simulation(condition, g_ratio, N_total=1000, frac_exc=0.8, p_conn=0.2,
 # ============================================================
 if __name__ == "__main__":
     # Network size to test
-    N_TOTAL = 5000
+    N_TOTAL = 400
     
     conditions = [
         ("AD", 2.5, 42),
@@ -284,7 +284,7 @@ if __name__ == "__main__":
         
         for r in results:
             ax.plot(r["f"], r["Pxx"], 
-                    label=f"{r['condition']} ({r['firing_rate']:.1f} Hz)", 
+                    label=f"{r['condition']} ", 
                     linewidth=2.5, 
                     color=colors.get(r["condition"], 'gray'))
         
@@ -306,13 +306,13 @@ if __name__ == "__main__":
                        fontsize=10, style='italic',
                        color='gray', alpha=0.7)
         
-        ax.set_xlabel("Frequency (Hz)", fontsize=12)
-        ax.set_ylabel("Relative power", fontsize=12)
+        ax.set_xlabel("Frequency (Hz)", fontsize=14, fontweight='bold')
+        ax.set_ylabel("Relative power", fontsize=14, fontweight='bold')
         ax.set_xlim(1, 40)
         ax.grid(alpha=0.3)
-        ax.legend(fontsize=11)
-        ax.set_title(f"E/I Balance Effects on EEG Power Spectrum (N={N_TOTAL}, Smoothed)", 
-                    fontsize=13)
+        ax.legend(fontsize=11,loc='upper right')
+
+#        ax.set_title(f"E/I Balance Effects on EEG Power Spectrum (N={N_TOTAL}, Smoothed)",                    fontsize=13)
         
         plt.tight_layout()
         plt.savefig(f"EI_EEG_proxy_conductance_N{N_TOTAL}_smooth.png", dpi=300)

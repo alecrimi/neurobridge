@@ -234,13 +234,13 @@ if all_spectra:
                    color='gray',
                    alpha=0.7)
 
-    ax.set_xlabel("Frequency (Hz)", fontsize=14, fontweight='bold')
-    ax.set_ylabel("Relative power", fontsize=14, fontweight='bold')
+    ax.set_xlabel("Frequency (Hz)", fontsize=14, fontweight='bold') # , fontweight='bold'
+    ax.set_ylabel("Relative power", fontsize=14 , fontweight='bold') #, fontweight='bold'
     ax.set_xlim([1, 40])
-    ax.grid(alpha=0.2)
-    ax.legend()
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
+    ax.grid(alpha=0.3)
+    ax.legend(fontsize=11,loc='upper right')
+    #ax.spines['top'].set_visible(False)
+    #ax.spines['right'].set_visible(False)
 
     plt.tight_layout()
     plt.savefig("power_spectra_EI_fixed.png", dpi=300)
